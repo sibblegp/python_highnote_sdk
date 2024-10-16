@@ -1,0 +1,844 @@
+mutation SimulateDeposit($input: SimulateDepositInput!) {
+  simulateDeposit(input: $input) {
+    __typename
+    ... on UserError {
+      errors {
+        path
+        code
+        description
+      }
+    }
+    ... on Transfer {
+      id
+      status
+    }
+    ... on AccessDeniedError {
+      message
+    }
+  }
+}
+
+mutation CreateCardProduct($input: CreateCardProductInput!) {
+  createCardProduct(input: $input) {
+    __typename
+    ... on CardProduct {
+      id
+      name
+      usage
+      vertical
+    }
+    ... on UserError {
+      errors {
+        path
+        code
+        description
+      }
+    }
+  }
+}
+
+query GetAllOrganizations {
+  organizations {
+    id
+    profile {
+      displayName
+      environment
+      region
+    }
+    cardProducts(first: 20) {
+      edges {
+        cursor
+        node {
+          __typename
+          id
+          name
+          usage
+          vertical
+          accounts {
+            edges {
+              node {
+                id
+                name
+                features {
+                  ... on DirectDepositFinancialAccountFeature {
+                    __typename
+                    enabled
+                  }
+                  ... on PrePaidPaymentCardFinancialAccountFeature {
+                    __typename
+                    enabled
+                  }
+                  ... on DebitPaymentCardFinancialAccountFeature {
+                    __typename
+                    enabled
+                  }
+                  ... on CreditPaymentCardFinancialAccountFeature {
+                    __typename
+                    enabled
+                  }
+                  ... on PayrollAdvanceFinancialAccountFeature {
+                    __typename
+                    enabled
+                  }
+                  ... on PayrollEmployerAdvanceFinancialAccountFeature {
+                    __typename
+                    enabled
+                  }
+                  ... on NegativeBalanceReserveFinancialAccountFeature {
+                    __typename
+                    enabled
+                  }
+                  ... on ProductReserveFinancialAccountFeature {
+                    __typename
+                    enabled
+                  }
+                  ... on JustInTimeFundingFinancialAccountFeature {
+                    __typename
+                    enabled
+                  }
+                  ... on ProductFundingFinancialAccountFeature {
+                    enabled
+                  }
+                  ... on SecuredCreditPaymentCardFinancialAccountFeature {
+                    __typename
+                    enabled
+                  }
+                  ... on FleetCardAccountFeature {
+                    __typename
+                    enabled
+                  }
+                  ... on CommercialCreditPayInFullCardAccountFeature {
+                    __typename
+                    enabled
+                  }
+                  ... on VendorProvidedBankFinancialAccountFeature {
+                    __typename
+                    enabled
+                  }
+                  ... on AchCapableFinancialAccountFeature {
+                    __typename
+                    enabled
+                  }
+                  ... on NonVerifiedFinancialAccountFeature {
+                    __typename
+                    enabled
+                  }
+                  ... on PointRewardFinancialAccountFeature {
+                    __typename
+                    enabled
+                  }
+                  ... on CardFundingFinancialAccountFeature {
+                    __typename
+                    enabled
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      pageInfo {
+        startCursor
+        endCursor
+        hasNextPage
+        hasPreviousPage
+      }
+    }
+  }
+}
+
+query Ping {
+  ping
+  organizations {
+    id
+    profile {
+      displayName
+    }
+  }
+}
+
+query GetUSAccountHolder($nodeId: ID!) {
+  node(id: $nodeId) {
+    ... on USBusinessAccountHolder {
+      __typename
+      businessProfile {
+        name {
+          legalBusinessName
+        }
+      }
+    }
+    ... on USPersonAccountHolder {
+      __typename
+      id
+      email
+      date_of_birth
+      name {
+        familyName
+        givenName
+      }
+    }
+  }
+}
+
+mutation CreateUSPersonAccountHolder($input: CreateUSPersonAccountHolderInput!) {
+  createUSPersonAccountHolder(input: $input) {
+    ... on USPersonAccountHolder {
+      id
+      externalId
+    }
+		... on UserError {
+			errors {
+				code
+				path
+			}
+		}
+  }
+}
+
+query GetFinancialAccountByID($id: ID!) {
+  node(id: $id) {
+    ... on FinancialAccount {
+      __typename
+      id
+      createdAt
+      name
+      owner {
+        __typename
+      }
+      cardProduct {
+        id
+      }
+      ledgers {
+        id
+        name
+        normalBalance
+        creditBalance {
+          value
+        }
+        debitBalance {
+          value
+        }
+        ledgerEntries {
+          edges {
+            node {
+              __typename
+              id
+              createdAt
+              amount {
+                value
+                currencyCode
+              }
+              financialEvent {
+                ... on Transfer {
+                  amount {
+                    value
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      features {
+        __typename
+        enabled
+        createdAt
+        updatedAt
+      }
+      directDepositDetails {
+        id
+        restrictedDetails {
+          ... on DirectDepositDetailRestrictedDetails {
+            number
+            routingNumber
+            bank {
+              name
+              address {
+                streetAddress
+                postalCode
+              }
+            }
+          }
+          ... on AccessDeniedError {
+            message
+          }
+        }
+      }
+    }
+  }
+}
+
+query PaymentTransaction($first: Int) {
+  paymentTransactions(first: $first) {
+    __typename
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    edges {
+      cursor
+      node {
+        __typename
+        id
+        createdAt
+        updatedAt
+        steps {
+          __typename
+          createdAt
+          amount {
+            value
+            currencyCode
+          }
+          events {
+            __typename
+            createdAt
+            updatedAt
+            amount {
+              value
+              currencyCode
+            }
+          }
+        }
+        status
+        accountingDirection
+        authorizedAmount {
+          value
+          currencyCode
+        }
+        authorizedAmount {
+          value
+          currencyCode
+        }
+        settledAmount {
+          value
+          currencyCode
+        }
+        disbursedAmount {
+          value
+          currencyCode
+        }
+        canceledAmount {
+          value
+          currencyCode
+        }
+        refundedAmount {
+          value
+          currencyCode
+        }
+        responseCode {
+          processorResponseCode
+          addressCode
+          postalCode
+          securityCode
+        }
+        instrument {
+          __typename
+          ... on PaymentCardInstrument {
+            createdAt
+            last4
+            expiryYear
+            expiryMonth
+            brand
+          }
+        }
+        ... on PaymentCreditTransaction {
+          originatedPaymentTransaction {
+            __typename
+            id
+            createdAt
+            updatedAt
+          }
+        }
+        ... on PaymentDebitTransaction {
+          refunds {
+            __typename
+            id
+            createdAt
+            updatedAt
+          }
+        }
+      }
+    }
+  }
+}
+
+query ReportUsage {
+  reportUsage {
+    ... on ReportUsage {
+      reportType
+      limit
+      limitRemaining
+      periodEnd
+    }
+  }
+}
+
+query FindFinancialAccount(
+  $id: ID!
+  $firstActivities: Int
+  $activitiesAfterCursor: String
+) {
+  node(id: $id) {
+    __typename
+    ... on FinancialAccount {
+      __typename
+      id
+      financialAccountActivities(
+        first: $firstActivities
+        after: $activitiesAfterCursor
+      ) {
+        pageInfo {
+          hasNextPage
+          hasPreviousPage
+          startCursor
+          endCursor
+        }
+        edges {
+          cursor
+          node {
+            __typename
+            sign
+            isComplete
+            pendingAmount {
+              value
+              currencyCode
+            }
+            postedAmount {
+              value
+              currencyCode
+            }
+            createdAt
+            source {
+              ... on DebitTransaction {
+                __typename
+                id
+                transactionEvents {
+                  __typename
+                  ... on Node {
+                    id
+                  }
+                  ... on AuthorizationEvent {
+                    merchantDetails {
+                      category
+                      name
+                    }
+                  }
+                  ... on IssuerPreliminaryAuthorizationEvent {
+                    merchantDetails {
+                      category
+                      name
+                    }
+                  }
+                  ... on ClearingEvent {
+                    merchantDetails {
+                      category
+                      name
+                    }
+                  }
+                  ... on BalanceInquiryEvent {
+                    merchantDetails {
+                      category
+                      name
+                    }
+                  }
+                  ... on VerificationEvent {
+                    merchantDetails {
+                      category
+                      name
+                    }
+                  }
+                  ... on AuthorizationAndClearEvent {
+                    id
+                    responseCode
+                    postalCodeResponseCode
+                    cvvResponseCode
+                    transactionProcessingType
+                    approvedAmount {
+                      value
+                      currencyCode
+                    }
+                    merchantDetails {
+                      countryCodeAlpha3
+                      category
+                      name
+                      description
+                      merchantId
+                      categoryCode
+                      address {
+                        postalCode
+                        streetAddress
+                        region
+                        locality
+                        countryCodeAlpha3
+                      }
+                    }
+                  }
+                  ... on ReversalEvent {
+                    merchantDetails {
+                      category
+                      name
+                    }
+                  }
+                }
+              }
+              ... on CreditTransaction {
+                __typename
+                id
+                transactionEvents {
+                  __typename
+                  ... on Node {
+                    id
+                  }
+                  ... on AuthorizationEvent {
+                    merchantDetails {
+                      category
+                      name
+                    }
+                  }
+                  ... on IssuerPreliminaryAuthorizationEvent {
+                    merchantDetails {
+                      category
+                      name
+                    }
+                  }
+                  ... on ClearingEvent {
+                    merchantDetails {
+                      category
+                      name
+                    }
+                  }
+                  ... on BalanceInquiryEvent {
+                    merchantDetails {
+                      category
+                      name
+                    }
+                  }
+                  ... on VerificationEvent {
+                    merchantDetails {
+                      category
+                      name
+                    }
+                  }
+                  ... on AuthorizationAndClearEvent {
+                    id
+                    responseCode
+                    postalCodeResponseCode
+                    cvvResponseCode
+                    merchantDetails {
+                      countryCodeAlpha3
+                      category
+                      name
+                      description
+                      merchantId
+                      categoryCode
+                      address {
+                        postalCode
+                        region
+                        locality
+                        countryCodeAlpha3
+                      }
+                    }
+                    pointOfServiceDetails {
+                      category
+                      cardDataInputCapability
+                      panEntryMode
+                      pinEntryMode
+                      terminalAttendance
+                      isCardHolderPresent
+                      isCardPresent
+                      terminalSupportsPartialApproval
+                      isRecurring
+                    }
+                  }
+                  ... on ReversalEvent {
+                    merchantDetails {
+                      category
+                      name
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+mutation SimulateSingleStepAuthAndClear(
+  $input: SimulateSingleStepAuthAndClearInput!
+) {
+  simulateSingleStepAuthAndClear(input: $input) {
+    ... on AuthorizationAndClearEvent {
+      id
+      transaction {
+        ... on Node {
+          __typename
+          id
+        }
+      }
+      originalAmount {
+        value
+        currencyCode
+      }
+      requestedAmount {
+        value
+        currencyCode
+      }
+      approvedAmount {
+        value
+        currencyCode
+      }
+      responseCode
+      partial
+      merchantDetails {
+        address {
+          locality
+          region
+          countryCodeAlpha3
+          postalCode
+        }
+        countryCodeAlpha3
+        category
+        categoryCode
+        name
+        merchantId
+        description
+      }
+      currentFinancialAccountMaximumBalanceAmount {
+        value
+        currencyCode
+      }
+      currentFinancialAccountAvailableToSpendAmount {
+        value
+        currencyCode
+      }
+      transactionProcessingType
+      pointOfServiceDetails {
+        category
+        panEntryMode
+        pinEntryMode
+        terminalAttendance
+        isCardHolderPresent
+        isCardPresent
+        isRecurring
+        terminalSupportsPartialApproval
+      }
+      additionalNetworkData {
+        __typename
+        ... on VisaData {
+          transactionIdentifier
+        }
+      }
+      paymentCardSnapshot {
+        createdAt
+        status
+        paymentCardCurrent {
+          id
+          expirationDate
+          last4
+        }
+      }
+    }
+    ... on UserError {
+      errors {
+        path
+        code
+        description
+      }
+    }
+  }
+}
+
+mutation createUSPersonAccountHolder(
+  $input: CreateUSPersonAccountHolderInput!
+) {
+  createUSPersonAccountHolder(input: $input) {
+    __typename
+    ... on UserError {
+      errors {
+        path
+        code
+        description
+      }
+    }
+    ... on USPersonAccountHolder {
+      id
+      email
+      dateOfBirth
+      externalId
+      updatedAt
+      createdAt
+      name {
+        givenName
+        familyName
+        title
+        suffix
+        middleName
+      }
+      billingAddress {
+        streetAddress
+        extendedAddress
+        postalCode
+        region
+        locality
+        countryCodeAlpha3
+      }
+      phoneNumbers {
+        countryCode
+        number
+        label
+      }
+      identificationDocument {
+        socialSecurityNumber {
+          numberHash
+          countryCodeAlpha3
+        }
+      }
+      personCreditRiskAttributes {
+        totalAnnualIncome {
+          value
+          currencyCode
+        }
+        currentDebtObligations {
+          value
+          currencyCode
+        }
+        employmentStatus
+      }
+    }
+  }
+}
+
+mutation createAccountHolderCardProductApplication(
+  $input: CreateAccountHolderCardProductApplicationInput!
+) {
+  createAccountHolderCardProductApplication(input: $input) {
+    __typename
+    ... on AccountHolderCardProductApplication {
+      id
+      applicationState {
+        status
+      }
+      updatedAt
+      createdAt
+    }
+    ... on UserError {
+      errors {
+        path
+        code
+        description
+      }
+    }
+  }
+}
+
+query LookupApplication($id: ID!) {
+  node(id: $id) {
+    ... on AccountHolderCardProductApplication {
+      __typename
+      applicationState {
+        status
+      }
+      accountHolderSnapshot {
+        ... on USPersonAccountHolderSnapshot {
+          __typename
+          currentVerification {
+            status
+            reason
+            results {
+              code
+              description
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+mutation IssueFinancialAccountForApplication(
+  $input: IssueFinancialAccountForApplicationInput!
+) {
+  issueFinancialAccountForApplication(input: $input) {
+    ... on FinancialAccount {
+      id
+      externalId
+      name
+      createdAt
+      updatedAt
+      application {
+        id
+        createdAt
+      }
+      cardProduct {
+        id
+        vertical
+      }
+      features {
+        __typename
+        enabled
+        createdAt
+        updatedAt
+      }
+      directDepositDetails {
+        id
+        restrictedDetails {
+          __typename
+          ... on DirectDepositDetailRestrictedDetails {
+            number
+            routingNumber
+            bank {
+              name
+            }
+          }
+        }
+      }
+      owner {
+        __typename
+        ... on USPersonAccountHolder {
+          id
+        }
+      }
+    }
+  }
+}
+
+mutation IssuePaymentCardForFinancialAccount(
+  $input: IssuePaymentCardForFinancialAccountInput!
+) {
+  issuePaymentCardForFinancialAccount(input: $input) {
+    ... on PaymentCard {
+      id
+      bin
+      last4
+      expirationDate
+      network
+      status
+    }
+    ... on UserError {
+      errors {
+        path
+        code
+        description
+      }
+    }
+  }
+}
+
+mutation ActivatePaymentCard($input: ActivatePaymentCardInput!) {
+  activatePaymentCard(input: $input) {
+    ...on PaymentCard {
+      status
+    }
+    ...on UserError {
+      errors {
+        code
+        path
+      }
+    }
+  }
+}

@@ -1,0 +1,5 @@
+[tool.ariadne-codegen]
+queries_path = "queries.gql"
+remote_schema_url = 'https://api.us.test.highnote.com/graphql'
+remote_schema_headers = {"Authorization" = "Basic c2tfdGVzdF9MWk00YmFKdEI5NHhiWFR2ZThMOUtaZlhjb1NvclpWUGduWThGVGtpSjFaaVhaTkZyUEdhMkxLWldvVnc0VUFrNEtjVUVERWs1UWJEc2ZGWUc1REt6SzJKNWQ="}
+async_client = false
